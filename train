@@ -1,0 +1,105 @@
+import os
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+
+# Step 1: Data Preprocessing
+train_datagen = ImageDataGenerator(rescale=1./255)
+test_datagen = ImageDataGenerator(rescale=1./255)
+
+train_set = train_datagen.flow_from_directory(
+    'gender_dataset/train',
+    target_size=(64, 64),
+    batch_size=32,
+    class_mode='binary'
+)
+
+test_set = test_datagen.flow_from_directory(
+    'gender_dataset/test',
+    target_size=(64, 64),
+    batch_size=32,
+    class_mode='binary'
+)
+
+# Step 2: Building CNN Model
+model = Sequential([
+    Conv2D(32, (3,3), activation='relu', input_shape=(64, 64, 3)),
+    MaxPooling2D(pool_size=(2,2)),
+
+    Conv2D(64, (3,3), activation='relu'),
+    MaxPooling2D(pool_size=(2,2)),
+
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Step 3: Training
+model.fit(train_set, validation_data=test_set, epochs=20)
+
+# Step 4: Save Model
+model.save('gender_detection_model.h5')
+
+print("✅ Model Trained and Saved Successfully!")
+
+# Import required libraries
+import os
+import numpy as np
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+# Define the folder paths (use your actual folder names)
+train_dir = 'dataset/train'   # <-- this is your train folder path
+test_dir = 'dataset/test'     # <-- this is your test folder path
+
+# Step 1: Create image data generators
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=10,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    zoom_range=0.1,
+    horizontal_flip=True
+)
+
+test_datagen = ImageDataGenerator(rescale=1./255)
+
+# Step 2: Load images from the directories
+train_set = train_datagen.flow_from_directory(
+    train_dir,                # ✅ pass folder path here, not the object
+    target_size=(64, 64),
+    batch_size=32,
+    class_mode='binary'
+)
+
+test_set = test_datagen.flow_from_directory(
+    test_dir,
+    target_size=(64, 64),
+    batch_size=32,
+    class_mode='binary'
+)
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+train_datagen = ImageDataGenerator(rescale=1./255)
+test_datagen = ImageDataGenerator(rescale=1./255)
+
+train_set = train_datagen.flow_from_directory(
+    train_dir,
+    target_size=(64,64),
+    batch_size=32,
+    class_mode='binary'
+)
+
+test_set = test_datagen.flow_from_directory(
+    test_dir,
+    target_size=(64,64),
+    batch_size=32,
+    class_mode='binary'
+)
+# Step 5: Evaluate the model
+loss, accuracy = model.evaluate(test_set)
+print(f"📊 Test Loss: {loss:.4f}")
+print(f"🎯 Test Accuracy: {accuracy * 100:.2f}%")
